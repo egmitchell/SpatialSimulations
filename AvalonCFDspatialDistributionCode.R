@@ -1,20 +1,14 @@
 ######### Code to simulate Mistaken Point Communities
 
+#size data comes from Clapham et al. 2003: https://figshare.com/articles/dataset/Mistaken_Point_Ediacaran_count_data/1111665
+#spatial aggregations are modelled for patterns <1m2, and from the results of Mitchell et a. 2015, Mitchell and Kenchington 2018 and Mitchell and Butterfield 2018. 
+#modelling abundant species only, ignoring rare specimens (which are unlikely to occur within a 1m2)
+
 
 library(spatstat)
-library(mclust)
 
-Mclust(marks(d.species1[[1]]))$parameters
-Mclust(marks(d.species1[[2]]))$parameters
-Mclust(log(marks(d.species1[[3]])))$parameters
+#D surface simulations. 
 
-
-Mclust((pect.data$width)/10)$parameters
-Mclust(bra.data$Width/10)$parameters
-Mclust(log(fra.data$Width/10))$parameters
-
-
-#going for majority, ignoring small numbers
 
 win.sim.d<-square(0,1)
 
@@ -26,10 +20,7 @@ size.bra<-rnorm(10,12,3)
 size.pect<-rnorm(10,67,19)
 size.fra<-exp(rlnorm(10,0.181,0.341))
 
-#
-#kppm.fra<-(kppm(unmark(d.species1[[3]]), clusters = "Thomas",statistic="pcf"))
-
-#simulate the points
+#spatial simulation. 
 
 res.sim.d<-list()
 
@@ -59,27 +50,52 @@ for(i in 1:25)
 	sim.d.1.table<-cbind(coords(sim.d.1),marks(sim.d.1))
 	colnames(sim.d.1.table)<-c("x","y","Length","Width","Orientation","species")
 
-	filename1<-paste("D://simDa_",paste(i),".txt",sep="")
+	filename1<-paste("C://simD_",paste(i),".txt",sep="")
 	write.table(sim.d.1.table,filename1,sep="\t",row.names=FALSE)
 	
 }
 
+#LMP spatial simulation
+
 sim.lmp.sp<-list()
 
-win.size<-10#n
+win.size<-10
 win.sim.lmp<-square(win.size) #100m2
 
-#kppm(unmark(rescale(lmp.species1[[1]],100)),cluster="Thomas",rmax=0.4)
-#kppm(unmark(rescale(lmp.species1[[2]],100)),cluster="Thomas",rmax=0.2)
-#kppm(unmark(rescale(lmp.species1[[3]],100)),cluster="Thomas",rmax=0.2)
+#beo
+width = 0.2555*length+1.01
+Mclust(marks(lmp.species1$`Charnia II`))$parameters
 
-#nb input parameter needs to be 2x point where closers pcf=1
+#Beothukis
+lengths1<-rlnorm(sim.fra1$n,2.176,0.440)
 
-#rSpeciesTC(npar,nclust,r1,parMean,parStd,kidsMean,kidsStd)
-#rSpeciesTC(round(win.size^2*(meanDensity)(propLarge),propSmall/propLarge,numberPerCluster,mean2,var2,mean1,varience1)
-#rSpeciesRC(ppp.par1,nclust2,r2,newkidsMean,newkidsStd)
+lengths1<-sample()
+frondWidth<-0.255*lengths1
+#Culmofrons
+frondlength<-0.41*lengths1
+frondwidth<-0.24*lengths1
+stemLength1<-0.59*length1
+stemwidth1<-0.18*stemLength1 #these are based off measurements off the single holotype since stem width isn't reliably measured
 
-#fit tc to beo culmo and ost
+#ostrichs
+frondlength<-0.68*lengths1+ 1.8975
+frondwidth<-0.39*lengths1+ 2.1503
+stemLength1<-0.32*length1
+stemwidth1<-0.43*stemLength1 #these are based off measurements off the single holotype since stem width isn't reliably measured
+
+#charnios heights
+lmp.cha.h<-c(19.8,12.4,15.3,3.8,25.6,22.4,2.8,7.7,4.6,9.3,16.5)
+frondlength<-0.68*lengths1
+frondwidth<-0.35*lengths1
+stemLength1<-0.32*length1
+stemwidth1<-0.66*stemLength1 #these are based off measurements off the single holotype since stem width isn't reliably measured
+
+#fronds
+lmp.frond.h<-c(5.8,3.6,6.9,14.6,3.4,8.1,9.4,6.8,3.7,1.7,3.2)
+frondlength1<-0.78*lengths1
+frondWidth<-0.76*lengths1
+stemLength1<-length1-frondlength1
+stemwidth1<-0.145*stemLength1 - 1.24 #these are based off measurements three holotype since stem width isn't reliably measured
 
 
 #Beothukis 
@@ -89,7 +105,6 @@ sim.lmp.sp[[1]]<-subset(sim.lmp.sp[[1]],marks(sim.lmp.sp[[1]])>1)
 #Culmofrons
 sim.lmp.sp[[2]]<-rSpeciesTC(round(win.size^2*1.963233/2),round(0.4375468/0.5624532),0.1553098,8.979649,sqrt(18.134112),2.958462,sqrt(0.3482764))
 sim.lmp.sp[[2]]<-subset(sim.lmp.sp[[2]],marks(sim.lmp.sp[[2]])>1)
-
 
 #ostrich
 #hpTC
@@ -103,7 +118,6 @@ sim.lmp.sp[[4]]<-rpoispp(1,win=win.sim.lmp)
 marks(sim.lmp.sp[[4]])<-rnorm(sim.lmp.sp[[4]]$n,9.4,5.559)
 sim.lmp.sp[[4]]<-subset(sim.lmp.sp[[4]],marks(sim.lmp.sp[[4]])>1)
 
-
 #fronds
 sim.lmp.sp[[5]]<-rpoispp(3,win=win.sim.lmp)
 marks(sim.lmp.sp[[5]])<-rnorm(sim.lmp.sp[[5]]$n,5.8,3.7)
@@ -115,7 +129,6 @@ sim.lmp.sp[[5]]<-subset(sim.lmp.sp[[5]],marks(sim.lmp.sp[[5]])>1)
 names(sim.lmp.sp)<-c("Beothukis","Culmofrons","OstrichFeather","Charniodiscus","Fronds")
 
 #add dimensions
-
 
 sim.lmp.1<-superimpose(Beothukis=sim.lmp.sp[[1]],Culmofrons=sim.lmp.sp[[2]],OstrichFeather=sim.lmp.sp[[3]],Charniodiscus=sim.lmp.sp[[4]],Fronds=sim.lmp.sp[[5]])
 	sim.lmp.1.table<-cbind(coords(sim.lmp.1),marks(sim.lmp.1))
@@ -147,8 +160,6 @@ for(i in 1:25)
 
 
 
-##########################################################################
-##below all changed
 add.fossil.dim.lmp<-function(sim.table)
 {
 	dim.table<-matrix(0,nrow(sim.table),4)
@@ -213,68 +224,14 @@ add.fossil.dim.lmp<-function(sim.table)
 
 sim.lmp.f.ab<-add.fossil.dim.lmp(sim.lmp.1.table.pos)
 
-sim.lmp.f.ab<-
-
-add.fossil.dim.lmp(sim.lmp.1.table.pos[690:695,])
-
-
-filename1<-paste("C://simLMPDim_10thFeb_",paste(i),".txt",sep="")
+filename1<-paste("C://simLMP_",paste(i),".txt",sep="")
 write.table(sim.lmp.f.ab,filename1,sep="\t",row.names=FALSE)
 
-#beo
-width = 0.2555*length+1.01
-Mclust(marks(lmp.species1$`Charnia II`))$parameters
 
-#Beothukis
-lengths1<-rlnorm(sim.fra1$n,2.176,0.440)
-
-lengths1<-sample()
-frondWidth<-0.255*lengths1
-#Culmofrons
-frondlength<-0.41*lengths1
-frondwidth<-0.24*lengths1
-stemLength1<-0.59*length1
-stemwidth1<-0.18*stemLength1 #these are based off measurements off the single holotype since stem width isn't reliably measured
-
-#ostrichs
-frondlength<-0.68*lengths1+ 1.8975
-frondwidth<-0.39*lengths1+ 2.1503
-stemLength1<-0.32*length1
-stemwidth1<-0.43*stemLength1 #these are based off measurements off the single holotype since stem width isn't reliably measured
-
-#charnios heights
-lmp.cha.h<-c(19.8,12.4,15.3,3.8,25.6,22.4,2.8,7.7,4.6,9.3,16.5)
-frondlength<-0.68*lengths1
-frondwidth<-0.35*lengths1
-stemLength1<-0.32*length1
-stemwidth1<-0.66*stemLength1 #these are based off measurements off the single holotype since stem width isn't reliably measured
-
-#fronds
-lmp.frond.h<-c(5.8,3.6,6.9,14.6,3.4,8.1,9.4,6.8,3.7,1.7,3.2)
-frondlength1<-0.78*lengths1
-frondWidth<-0.76*lengths1
-stemLength1<-length1-frondlength1
-stemwidth1<-0.145*stemLength1 - 1.24 #these are based off measurements three holotype since stem width isn't reliably measured
+#Simulating E surface
 
 
-
-
-##ChaP
 ##########
-hp.e.all<-density(superimpose(sim.e.sp[[4]],sim.e.sp[[5]],sim.e.sp[[6]],sim.e.sp[[7]]),0.5)
-all.pts<-superimpose(sim.e.sp[[4]],sim.e.sp[[5]],sim.e.sp[[6]],sim.e.sp[[7]])
-bi.e.all.pts<-round(win.size^2*summary(all.pts)$intensity*0.5)
-
-bi.chaP<-rpoint(bi.e.all.pts*sim.e.sp[[4]]$n/all.pts$n,hp.e.all,win=win.sim.e)
-marks(bi.chaP)<-rnorm(bi.chaP$n,3.8,sqrt(0.52))
-sim.e.sp.bi[[4]]<-superimpose(sim.e.sp[[4]],bi.chaP)
-
-
-
-ppp.par1<-rSpeciesTC(round(win.size^2*3.37779*0.1723134),round(0.369313/0.1723134),1,13.5,sqrt(26.5),7.02,sqrt(3.95))
-sim.e.sp[[4]]<-rSpeciesRC(ppp.par1,2.5,0.5,3.8,sqrt(0.52))
-
-
 
 
 ## code for E sims below
@@ -402,8 +359,6 @@ sim.e.bi<-superimpose(Thectardis=sim.e.sp.bi[[1]],Bradgatia=sim.e.sp.bi[[2]],Beo
 #Subsampling to a meter squared
 ppp1<-sim.e.bi
 
-
-
 ###univariate
 
 	sim.e.1<-superimpose(Thectardis=sim.e.sp[[1]],Bradgatia=sim.e.sp[[2]],Beothukis=sim.e.sp[[3]],CharnioP=sim.e.sp[[4]],CharnioS=sim.e.sp[[5]],Fractofusus=sim.e.sp[[6]],Primocandelabrum=sim.e.sp[[7]],Plumeropriscum=sim.e.sp[[8]])
@@ -414,7 +369,6 @@ ppp1<-sim.e.bi
 	write.table(sim.e.1.table,filename1,sep="\t",row.names=FALSE)
 
 
-####not sure what doing
 #### bivariate
 sim.e.sp.bi<-sim.e.sp
 
@@ -449,9 +403,21 @@ i<-1
 filename1<-paste("D://Dropbox/Projects/d_susannaCFDcommunities/simE_",paste(i),".txt",sep="")
 write.table(sim.e.bi.table,filename1,sep="\t",row.names=FALSE)
 
+hp.e.all<-density(superimpose(sim.e.sp[[4]],sim.e.sp[[5]],sim.e.sp[[6]],sim.e.sp[[7]]),0.5)
+all.pts<-superimpose(sim.e.sp[[4]],sim.e.sp[[5]],sim.e.sp[[6]],sim.e.sp[[7]])
+bi.e.all.pts<-round(win.size^2*summary(all.pts)$intensity*0.5)
+
+bi.chaP<-rpoint(bi.e.all.pts*sim.e.sp[[4]]$n/all.pts$n,hp.e.all,win=win.sim.e)
+marks(bi.chaP)<-rnorm(bi.chaP$n,3.8,sqrt(0.52))
+sim.e.sp.bi[[4]]<-superimpose(sim.e.sp[[4]],bi.chaP)
 
 
-######
+
+ppp.par1<-rSpeciesTC(round(win.size^2*3.37779*0.1723134),round(0.369313/0.1723134),1,13.5,sqrt(26.5),7.02,sqrt(3.95))
+sim.e.sp[[4]]<-rSpeciesRC(ppp.par1,2.5,0.5,3.8,sqrt(0.52))
+
+
+###### Functions used for E simluation
 
 rSpeciesHP<-function(den1,r1,mean1,std1)
 {
@@ -544,28 +510,6 @@ rSpeciesClusters<-function(ppp.par,nclust,r1)
 	{
 		res.hc.x[[i]]<-runifdisc(n, radius, centre=c(par.coords[i,1],par.coords[i,2]))
 	}
-
-	#for(i in 1:length(res.hc.x))
-	#{
-	#	plot(res.hc.x[[i]],cols=3,pch=16,add=TRUE)
-	#}
-
-	#join parents with babies
-	##need to subtrace empty ones?
-
-	#i<-5
-	#res.hc.y<-superimpose(res.hc.x[[i]],ppp(par.coords[i,1],par.coords[i,2],window = win.test),W=win.test)
-
-	res.hc.y<-res.hc.x##list()
-
-	##for(i in 1:length(res.hc.x))
-	##{
-	##	res.hc.y[[i]]<-superimpose(res.hc.x[[i]],ppp(par.coords[i,1],par.coords[i,2],window = win.test),W=win.test)
-	##	marks(res.hc.y[[i]])<-as.factor(paste("sp",i))
-###
-	##}
-#
-	#merge and impose as different species
 	res.hc.z<-list()
 
 
@@ -597,16 +541,4 @@ rSpeciesClusters<-function(ppp.par,nclust,r1)
 
 
 sim.e.s1<-ppp(coords(sim.e.1)[,1],coords(sim.e.1)[,2],marks=marks((sim.e.1)),window = rect(3,4,4,5))
-
-
-subsamplePPP<-function(ppp1,samplesize,maxWindSize)
-{
-	coordsMin<-sample(maxWindSize-1,2)
-	sim.e.s1<-ppp(coords(ppp1)[,1],coords(ppp1)[,2],marks=marks(ppp1),window = owin(c(coordsMin[1],coordsMin[1]+1),c(coordsMin[2],coordsMin[2]+1)))
-	
-
-
-}
-
-
 
